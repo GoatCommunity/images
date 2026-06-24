@@ -1,0 +1,64 @@
+export TERM=xterm-256color
+export LC_ALL=en_US.UTF-8
+
+# ── Container identity ────────────────────────────────────────────────────────
+# GOAT_NAME is injected by the wrapper (mirrors Exegol's EXEGOL_NAME)
+export GOAT_HOSTNAME="${GOAT_NAME:-$(hostname)}"
+
+# ── Oh-My-Zsh ─────────────────────────────────────────────────────────────────
+export ZSH="/root/.oh-my-zsh"
+ZSH_THEME="gentoo"
+plugins=(git tmux)
+
+[[ -f "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
+
+# ── Prompt (shows container name so the user always knows where they are) ─────
+PROMPT='%F{cyan}🐐 [%B${GOAT_HOSTNAME}%b]%f %F{yellow}%n%f %F{blue}%1~%f %# '
+
+# ── PATH: goat tools ──────────────────────────────────────────────────────────
+export PATH="/opt/tools/bin:$PATH"
+
+# ── Go (set during build; safe to re-export at runtime) ──────────────────────
+if [[ -d /usr/local/go ]]; then
+    export GOROOT=/usr/local/go
+    export GOPATH=/opt/go
+    export PATH="$PATH:$GOROOT/bin:$GOPATH/bin"
+elif command -v go &>/dev/null; then
+    export GOPATH="$(go env GOPATH 2>/dev/null)"
+    [[ -n "$GOPATH" ]] && export PATH="$PATH:$GOPATH/bin"
+fi
+
+# ── Python venvs / pipx ───────────────────────────────────────────────────────
+export PATH="$PATH:/root/.local/bin"
+
+# ── Aliases ───────────────────────────────────────────────────────────────────
+alias ll='ls -lah --color=auto'
+alias la='ls -A --color=auto'
+alias grep='grep --color=auto'
+alias ..='cd ..'
+alias ...='cd ../..'
+
+# Network shortcuts
+alias ip='ip -c'
+alias listen='ss -tlnp'
+
+# Tool shortcuts
+alias py='python3'
+alias pip='pip3'
+
+# ── Session greeting ──────────────────────────────────────────────────────────
+# Only on interactive shells, not when spawned by scripts
+if [[ $- == *i* ]] && [[ -f "/.goat/installed_tools.txt" ]]; then
+    TOOL_COUNT=$(wc -l < "/.goat/installed_tools.txt" 2>/dev/null || echo "?")
+    echo -e "\e[36m🐐 Goat container ready — ${TOOL_COUNT} tools installed\e[0m"
+    echo -e "\e[90m   /workspace is your persistent workspace\e[0m"
+fi
+
+# ── My-resources ──────────────────────────────────────────────────────────────
+# If the wrapper mounts a my-resources volume, source its setup script
+if [[ -f "/opt/my-resources/setup/zsh/history" ]]; then
+    cat /opt/my-resources/setup/zsh/history >> ~/.zsh_history 2>/dev/null || true
+fi
+if [[ -f "/opt/my-resources/setup/zsh/aliases" ]]; then
+    source /opt/my-resources/setup/zsh/aliases 2>/dev/null || true
+fi
