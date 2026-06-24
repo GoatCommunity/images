@@ -12,8 +12,10 @@ plugins=(git tmux)
 
 [[ -f "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
 
-# ── Prompt (shows container name so the user always knows where they are) ─────
-PROMPT='%F{cyan}🐐 [%B${GOAT_HOSTNAME}%b]%f %F{yellow}%n%f %F{blue}%1~%f %# '
+# ── Prompt (Exegol-style: [HH:MM:SS] goat-<profile> /path #) ─────────────────
+# GOATOS_IMAGE is set at build time via ENV in the Dockerfile (e.g. goat-light)
+GOATOS_IMAGE="${GOATOS_IMAGE:-goat}"
+PROMPT='%F{cyan}[%*]%f %B%F{cyan}${GOATOS_IMAGE}%b%f %B%F{white}%~%b%f %# '
 
 # ── PATH: goat tools ──────────────────────────────────────────────────────────
 export PATH="/opt/tools/bin:$PATH"
@@ -50,7 +52,7 @@ alias pip='pip3'
 # Only on interactive shells, not when spawned by scripts
 if [[ $- == *i* ]] && [[ -f "/.goat/installed_tools.txt" ]]; then
     TOOL_COUNT=$(wc -l < "/.goat/installed_tools.txt" 2>/dev/null || echo "?")
-    echo -e "\e[36m🐐 Goat container ready — ${TOOL_COUNT} tools installed\e[0m"
+    echo -e "\e[36m[${GOATOS_IMAGE}] Goat container ready — ${TOOL_COUNT} tools installed\e[0m"
     echo -e "\e[90m   /workspace is your persistent workspace\e[0m"
 fi
 
