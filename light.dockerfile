@@ -25,6 +25,7 @@ LABEL org.goat.src_repository="https://github.com/GoatCommunity/images"
 
 ENV GOAT_BUILD_TYPE="${VERSION}"
 ENV GOAT_START_SHELL="zsh"
+ENV GOATOS_IMAGE="goat-${BUILD_PROFILE}"
 
 COPY sources /root/sources/
 
